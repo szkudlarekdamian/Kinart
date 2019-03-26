@@ -84,10 +84,7 @@ class Kinart(object):
         some_button.config(relief=SUNKEN)
         self.active_button_color = some_button
         self.eraser_on = eraser_mode
-
-        self.active_button.config(relief=RAISED)
-        self.pen_button.config(relief=SUNKEN)
-        self.active_button = self.pen_button
+        self.activate_button(self.pen_button)
 
     def paint(self, event):
         self.line_width = 20.0 if self.eraser_on else 5.0
