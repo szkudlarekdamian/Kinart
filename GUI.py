@@ -1,5 +1,5 @@
 from tkinter import *
-import tkFileDialog
+#import tkFileDialog
 #from tkinter.colorchooser import askcolor
 from PIL import Image
 
@@ -35,15 +35,16 @@ class Paint(object):
         self.c.grid(row=1, columnspan=6)
 
         # SAVE IMAGE
-        self.save_button = Button(self.root, bg='black', height=3, width=7, command=self.save)
-        self.save_button.grid(row=2, columnspan=6)
+        #self.save_button = Button(self.root, bg='black', height=3, width=7, command=self.save)
+        #self.save_button.grid(row=2, columnspan=6)
 
         self.setup()
         self.root.mainloop()
 
-    def save(self):
-        self.filename = tkFileDialog.asksaveasfilename(initialdir="/", title="Select file",
-                                                       filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+    #def save(self):
+    #    self.filename = tkFileDialog.asksaveasfilename(initialdir="/", title="Select file",
+    #                                                   filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+
     def setup(self):
         self.old_x = None
         self.old_y = None
@@ -92,6 +93,7 @@ class Paint(object):
             self.c.create_line(self.old_x, self.old_y, event.x, event.y,
                                width=self.line_width, fill=paint_color,
                                capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
         self.old_x = event.x
         self.old_y = event.y
 
