@@ -132,31 +132,32 @@ class HandTracker(object):
         return color, coords
 
 
-#Ścieżka do filmu z mapą głębi lub ID kamery
-videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth4_v2.avi"
+if __name__ == "__main__":
+    #Ścieżka do filmu z mapą głębi lub ID kamery
+    videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth4_v2.avi"
 
-#Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
-hT = HandTracker(videoPath)
+    #Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
+    hT = HandTracker(videoPath)
 
-while(hT.kinectOpened()):
-    #Sztuczne spowolnienie klatek, tylko do celów testowych
-    time.sleep(0.3)
-    #Pobieranie kolejnej klatki
-    frame = hT.getNextFrame()
-    #Jeśli klatka została wczytana poprawnie to kontynuuj
-    if frame is not None:
-        #Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
-        if hT.handInitialized is False:
-            #Pokaż klatkę z narysowaną przestrzenią na dłoń
-            cv2.imshow('Kinart',hT.getFrameWithInitBox(frame))
-            #Jeśli wciśnięto 'z' to rozpocznij inicjalizację dłoni
-            if cv2.waitKey(1) == ord('z'):
-                hT.initTracker(frame)
-                hT.handInitialized = True
-        #Jeśli dłoń została zainicjalizowana to
+    while(hT.kinectOpened()):
+        #Sztuczne spowolnienie klatek, tylko do celów testowych
+        time.sleep(0.3)
+        #Pobieranie kolejnej klatki
+        frame = hT.getNextFrame()
+        #Jeśli klatka została wczytana poprawnie to kontynuuj
+        if frame is not None:
+            #Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
+            if hT.handInitialized is False:
+                #Pokaż klatkę z narysowaną przestrzenią na dłoń
+                cv2.imshow('Kinart',hT.getFrameWithInitBox(frame))
+                #Jeśli wciśnięto 'z' to rozpocznij inicjalizację dłoni
+                if cv2.waitKey(1) == ord('z'):
+                    hT.initTracker(frame)
+                    hT.handInitialized = True
+            #Jeśli dłoń została zainicjalizowana to
+            else:
+                #Śledź dłoń i uzyskaj jej współrzędne
+                frameWithCoords, coords = hT.trackHand(frame)
+                cv2.imshow('Kinart', frameWithCoords)
         else:
-            #Śledź dłoń i uzyskaj jej współrzędne
-            frameWithCoords, coords = hT.trackHand(frame)
-            cv2.imshow('Kinart', frameWithCoords)
-    else:
-        break
+            break
