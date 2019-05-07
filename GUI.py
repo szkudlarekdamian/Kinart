@@ -1,6 +1,6 @@
 import tkinter as tk
 import time
-import pyautogui
+#import pyautogui
 import handTracker as ht
 import cv2
 
@@ -14,30 +14,34 @@ class Kinart(object):
         self.root.lift() # always on the top
 
         # WINDOW SIZE
-        sheight, swidth = self.root.winfo_screenheight(), self.root.winfo_screenwidth()
+        self.sheight, self.swidth = self.root.winfo_screenheight(), self.root.winfo_screenwidth()
         #self.root.geometry('{}x{}'.format(swidth,sheight))
-        self.root.geometry('600x600')
+        #self.root.geometry('640x480+-8+-8')
+        #self.root.geometry('1536x801+-8+-8')
+
+        #self.frame = tk.Frame(self.root, bg='red')
+        #self.frame.pack(side="LEFT", fill='BOTH')
 
         # PEN BUTTON
-        self.pen_button = tk.Button(self.root, text='PEN', height=3, width=7, command=self.use_pen)
+        self.pen_button = tk.Button(self.root, text='PEN', height=3, width=5, command=self.use_pen)
         self.pen_button.grid(row=0, column=0, sticky='NSEW')
 
         # ERASER BUTTON
-        self.eraser_button = tk.Button(self.root, text='eraser', height=3, width=7, command=self.use_eraser)
+        self.eraser_button = tk.Button(self.root, text='eraser', height=3, width=5, command=self.use_eraser)
         self.eraser_button.grid(row=0, column=1, sticky='NSEW')
 
         # 4 COLORS
-        self.color_button1 = tk.Button(self.root, bg='green', height=3, width=7, command=self.green_color)
+        self.color_button1 = tk.Button(self.root, bg='green', height=3, width=5, command=self.green_color)
         self.color_button1.grid(row=0, column=2, sticky='NSEW')
-        self.color_button2 = tk.Button(self.root, bg='red', height=3, width=7, command=self.red_color)
+        self.color_button2 = tk.Button(self.root, bg='red', height=3, width=5, command=self.red_color)
         self.color_button2.grid(row=0, column=3, sticky='NSEW')
-        self.color_button3 = tk.Button(self.root, bg='blue', height=3, width=7, command=self.blue_color)
+        self.color_button3 = tk.Button(self.root, bg='blue', height=3, width=5, command=self.blue_color)
         self.color_button3.grid(row=0, column=4, sticky='NSEW')
-        self.color_button4 = tk.Button(self.root, bg='black', height=3, width=7, command=self.black_color)
+        self.color_button4 = tk.Button(self.root, bg='black', height=3, width=5, command=self.black_color)
         self.color_button4.grid(row=0, column=5, sticky='NSEW')
 
         # PAINTING
-        self.painting = tk.Canvas(self.root, bg='white')
+        self.painting = tk.Canvas(self.root, bg='white', width=640, height=480)
         self.painting.grid(row=1, columnspan=6, sticky='NSEW')
 
         # AUTORESIZE ELEMENTS
@@ -50,6 +54,7 @@ class Kinart(object):
         self.root.grid_rowconfigure(0, weight=0)
         self.root.grid_rowconfigure(1, weight=1)
 
+        self.root.update()
         self.setup()
 
         #while True:
@@ -66,6 +71,10 @@ class Kinart(object):
         #    self.root.update()
 
         #self.root.mainloop()
+
+    def getWindowSize(self):
+        self.root.update()
+        return self.root.winfo_geometry()
 
     def updateCoords(self, x, y):
         time.sleep(0.1)
@@ -92,6 +101,12 @@ class Kinart(object):
 
     def use_pen(self):
         self.activate_button(self.pen_button)
+
+    def getscreenwidth(self):
+        return self.swidth
+
+    def getscreenheight(self):
+        return self.sheight
 
     def green_color(self):
         self.eraser_on = False
@@ -152,6 +167,9 @@ if __name__ == '__main__':
 
     # Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
     hT = ht.HandTracker(videoPath)
+    #print(hT.width)
+    #print(hT.height)
+
     # Obiekt klasy Kinart - rysowanie
     paint = Kinart()
 
@@ -176,8 +194,24 @@ if __name__ == '__main__':
                 frameWithCoords, coords = hT.trackHand(frame)
                 cv2.imshow('Kinart', frameWithCoords)
                 cv2.waitKey(1)
+
                 if coords != None:
-                    paint.updateCoords(coords[0],coords[1])
+                    if coords[0] < 0:
+                        print("Wrong coords !")
+                    elif coords[0] > 640:
+                        print("Wrong coords !")
+                    elif coords[1] < 0:
+                        print("Wrong coords !")
+                    elif coords[1] > 480:
+                        print("Wrong coords !")
+                    else:
+                        #print(coords)
+                        #print(paint.getWindowSize())
+                        paint.updateCoords(640-coords[0],coords[1])
+                        print(coords)
+                else:
+                    print("NONE coords")
+
         else:
             break
 
