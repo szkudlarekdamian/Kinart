@@ -1,6 +1,5 @@
 import tkinter as tk
 import time
-#import pyautogui
 import handTracker as ht
 import cv2
 
@@ -17,7 +16,7 @@ class Kinart(object):
         self.sheight, self.swidth = self.root.winfo_screenheight(), self.root.winfo_screenwidth()
         #self.root.geometry('{}x{}'.format(swidth,sheight))
         #self.root.geometry('640x480+-8+-8')
-        #self.root.geometry('1536x801+-8+-8')
+        self.root.geometry('640x480')
 
         #self.frame = tk.Frame(self.root, bg='red')
         #self.frame.pack(side="LEFT", fill='BOTH')
@@ -41,7 +40,7 @@ class Kinart(object):
         self.color_button4.grid(row=0, column=5, sticky='NSEW')
 
         # PAINTING
-        self.painting = tk.Canvas(self.root, bg='white', width=640, height=480)
+        self.painting = tk.Canvas(self.root, bg='white')
         self.painting.grid(row=1, columnspan=6, sticky='NSEW')
 
         # AUTORESIZE ELEMENTS
@@ -196,19 +195,34 @@ if __name__ == '__main__':
                 cv2.waitKey(1)
 
                 if coords != None:
+                    print(coords)
+
                     if coords[0] < 0:
                         print("Wrong coords !")
                     elif coords[0] > 640:
                         print("Wrong coords !")
-                    elif coords[1] < 0:
+                    elif coords[1] <= 0:
                         print("Wrong coords !")
                     elif coords[1] > 480:
                         print("Wrong coords !")
+                    elif coords[1] > 0 and coords[1] < 15:
+                        if coords[0] > 0 and coords[0] <= 106:
+                            print("PEN BUTTON")
+                        if coords[0] > 106 and coords[0] <= 212:
+                            print("ERASER BUTTON")
+                        if coords[0] > 212 and coords[0] <= 318:
+                            print("GREEN BUTTON")
+                        if coords[0] > 318 and coords[0] <= 424:
+                            print("RED BUTTON")
+                        if coords[0] > 424 and coords[0] <= 530:
+                            print("BLUE BUTTON")
+                        if coords[0] > 530 and coords[0] < 640:
+                            print("BLACK BUTTON")
                     else:
                         #print(coords)
                         #print(paint.getWindowSize())
                         paint.updateCoords(640-coords[0],coords[1])
-                        print(coords)
+                        
                 else:
                     print("NONE coords")
 
