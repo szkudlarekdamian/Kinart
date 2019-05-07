@@ -1,20 +1,60 @@
+
 import numpy as np
 import cv2
+from threading import Thread, Event
 import time
+import kinect_video_recorder as kin
+
+
+#KEY OPTIONS
+checkingForHandInterval = 1
+howManyTimesHandMustBeFound = 5
+minimumValueToConsiderHand = 14
+maximumValueToConsiderHand = 17
+
+boundingBoxColorInit = (177, 187, 223)
+centerPointColorInit = (118, 100, 245)
+boundingBoxColorTracking = (173,245,145)
+centerPointColorTracking = (239,237,191)
+
+
+class MyThread(Thread):
+    def __init__(self, event):
+        Thread.__init__(self)
+        self.stopped = event
+        self.found = 1
+        self.isRunning = False
+
+    def run(self):
+        self.isRunning = True
+        global centerValue
+        while not self.stopped.wait(checkingForHandInterval):
+            #print(centerValue)
+            if minimumValueToConsiderHand <= centerValue <= maximumValueToConsiderHand:
+                self.found += 1
+            else:
+                self.found = 1
+                #self.stopped.set()
+            if self.found == howManyTimesHandMustBeFound+1:
+                self.isRunning = False
+                self.stopped.set()
 
 class HandTracker(object):
     def __init__(self, source):
         self.cap = cv2.VideoCapture(source)
-        #self.cap.set(cv2.CAP_PROP_POS_MSEC, 39000)
+        self.cap.set(cv2.CAP_PROP_POS_MSEC, 39500)
 
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.handInitialized = False
 
-        self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self.writer = cv2.VideoWriter("outputAA.avi", self.fourcc, 10.0, (640, 480), True)
+        #self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        #self.writer = cv2.VideoWriter("MOSSE.avi", self.fourcc, 10.0, (640, 480), True)
 
-        self.tracker = cv2.TrackerMedianFlow_create()
+        self.tracker = cv2.TrackerCSRT_create()
+
+        self.stopFlag = Event()
+        self.thread = MyThread(self.stopFlag)
 
         self.x1 = int(self.width * 0.3)
         self.x2 = int(self.width * 0.46)
@@ -33,17 +73,18 @@ class HandTracker(object):
         return frame
 
     def getFrameWithInitBox(self, frame):
-        cv2.circle(frame, (self.centerPoint[0], self.centerPoint[1]), 3, [255, 102, 0], 2)
-        cv2.rectangle(frame, (self.x1, self.y1), (self.x2, self.y2), [255, 102, 0], 2)
+        cv2.circle(frame, (self.centerPoint[0], self.centerPoint[1]), 3, centerPointColorInit, 2)
+        cv2.rectangle(frame, (self.x1, self.y1), (self.x2, self.y2), boundingBoxColorInit, 2)
         return frame
 
     def filterDepth(self, frame, closestDistant, furthestDistant):
         return (np.where(((frame <= furthestDistant) & (frame >= closestDistant)), 128, 0)).astype(np.uint8)
 
     def enhanceFrame(self, frame):
-        np.clip(frame, 0, 2 ** 10 - 1, frame)
-        frame >>= 2
-        return frame.astype(np.uint8)
+        frameCopy = frame.copy()
+        np.clip(frameCopy, 0, 2 ** 10 - 1, frameCopy)
+        frameCopy >>= 2
+        return frameCopy.astype(np.uint8)
 
     def getNeighbourhoodROI(self, frame, centerPoint, side):
         lowerHeight = centerPoint[1] - side // 2
@@ -51,6 +92,14 @@ class HandTracker(object):
         lowerWidth = centerPoint[0] - side // 2
         upperWidth = centerPoint[0] + side // 2
         return frame[lowerHeight:upperHeight, lowerWidth:upperWidth]
+
+    def getValueOfCenter(self, frame):
+        frame = self.enhanceFrame(frame)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        center = self.getNeighbourhoodROI(frame, self.centerPoint, 60)
+        median = np.median(center)
+        return median
+
 
     def filterFrame(self, frame, center, condition=5, kernelSize=3, iterations=1):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -96,18 +145,15 @@ class HandTracker(object):
         filtered = self.filterFrame(frame, center)
         flood = self.floodFill(filtered)
         img, boundingBox = self.findHandContour(flood, drawContour=True)[0:4:3]
-
         self.tracker.init(filtered, boundingBox)
 
-
     def trackHand(self, frame):
-
         # if self.writer is None:
         #     self.fourcc = cv2.VideoWriter_fourcc(*"XVID")
         #     self.writer = cv2.VideoWriter("outputAA.avi", self.fourcc, 10.0,
         #                              (frame.shape[1], frame.shape[0]), True)
-        frame = self.enhanceFrame(frame)
         color = frame.copy()
+        frame = self.enhanceFrame(frame)
 
         frame = self.filterDepth(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 10, 30)
 
@@ -116,8 +162,8 @@ class HandTracker(object):
             #Pomyślny tracking
             p1 = (int(boundRect[0]), int(boundRect[1]))
             p2 = (int(boundRect[0] + boundRect[2]), int(boundRect[1] + boundRect[3]))
-            cv2.rectangle(color, p1, p2, (255, 0, 0), 2, 1)
-            cv2.circle(color, ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2), 3, (0, 0, 255), -1)
+            cv2.rectangle(color, p1, p2, boundingBoxColorTracking, 2, 1)
+            cv2.circle(color, ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2), 3, centerPointColorTracking, -1)
             coords = ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)
 
         else:
@@ -131,33 +177,67 @@ class HandTracker(object):
         # self.writer.write(color)
         return color, coords
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     #Ścieżka do filmu z mapą głębi lub ID kamery
-    videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth4_v2.avi"
+    # videoPath = "../filmy_dla_Danona/videokinec_depth4_v2.avi"
+    videoPath = './videokinec_depth13.avi'
+
+    # #Ściażka do zapisu plików
+    # colour_video_name = 'videokinec_colour13.avi'
+    # depth_video_name = 'videokinec_depth13.avi'
+
+    # video_colour, video_depth = kin.create_depth_and_colour_recordings(colour_video_name,
+    #                                                                 depth_video_name)
+    # print('Creating files for videos:', colour_video_name, ' and ', depth_video_name)
+    frame = kin.get_depth_with_3rd_layer()
 
     #Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
     hT = HandTracker(videoPath)
+    centerValue = 0
 
-    while(hT.kinectOpened()):
-        #Sztuczne spowolnienie klatek, tylko do celów testowych
-        time.sleep(0.3)
-        #Pobieranie kolejnej klatki
-        frame = hT.getNextFrame()
+    while hT.kinectOpened():
+        cv2.waitKey(1)
+        hT.cap.set(cv2.CAP_PROP_POS_MSEC, 39550)
+        # Sztuczne spowolnienie klatek, tylko do celów testowych
+        # Pobieranie kolejnej klatki
+        # frame = hT.getNextFrame()
+        frame = kin.get_depth_with_3rd_layer()
+
+        # video_depth.write(frame)
+        # print(frame)
+
         #Jeśli klatka została wczytana poprawnie to kontynuuj
         if frame is not None:
             #Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
             if hT.handInitialized is False:
-                #Pokaż klatkę z narysowaną przestrzenią na dłoń
+                centerValue = hT.getValueOfCenter(frame)
+            # Pokaż klatkę z narysowaną przestrzenią na dłoń
                 cv2.imshow('Kinart',hT.getFrameWithInitBox(frame))
-                #Jeśli wciśnięto 'z' to rozpocznij inicjalizację dłoni
-                if cv2.waitKey(1) == ord('z'):
-                    hT.initTracker(frame)
-                    hT.handInitialized = True
-            #Jeśli dłoń została zainicjalizowana to
+            # Jeśli wątek jest już uruchomiony
+                if hT.thread.isRunning:
+                    # print("Hand found in thread: "+str(hT.thread.found))
+                    if hT.thread.found == howManyTimesHandMustBeFound:
+                        print("Hand initialized")
+                        hT.initTracker(frame)
+                        hT.handInitialized = True
+                else:
+                    print("Searching for hand")
+
+                    hT.stopFlag.clear()
+                    hT.thread = MyThread(hT.stopFlag)
+                    hT.thread.start()
+            # #Jeśli dłoń została zainicjalizowana to
             else:
                 #Śledź dłoń i uzyskaj jej współrzędne
                 frameWithCoords, coords = hT.trackHand(frame)
                 cv2.imshow('Kinart', frameWithCoords)
+                # Jeśli wciśnięto 'z' to rozpocznij inicjalizację dłoni
+                if cv2.waitKey(1) == ord('q'):
+                    break
         else:
             break
+    
+    # video_colour.release()
+    # print('Colour video saved as:', colour_video_name)
+    # video_depth.release()
+    # print('Depth video saved as:', depth_video_name)
