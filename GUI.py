@@ -1,5 +1,6 @@
 import tkinter as tk
 import time
+#import pyautogui
 import handTracker as ht
 import cv2
 
@@ -207,22 +208,22 @@ if __name__ == '__main__':
                         print("Wrong coords !")
                     elif coords[1] > 0 and coords[1] < 15:
                         if coords[0] > 0 and coords[0] <= 106:
-                            print("PEN BUTTON")
-                        if coords[0] > 106 and coords[0] <= 212:
-                            print("ERASER BUTTON")
-                        if coords[0] > 212 and coords[0] <= 318:
-                            print("GREEN BUTTON")
-                        if coords[0] > 318 and coords[0] <= 424:
-                            print("RED BUTTON")
-                        if coords[0] > 424 and coords[0] <= 530:
-                            print("BLUE BUTTON")
-                        if coords[0] > 530 and coords[0] < 640:
                             print("BLACK BUTTON")
+                        if coords[0] > 106 and coords[0] <= 212:
+                            print("BLUE BUTTON")
+                        if coords[0] > 212 and coords[0] <= 318:
+                            print("RED BUTTON")
+                        if coords[0] > 318 and coords[0] <= 424:
+                            print("GREEN BUTTON")
+                        if coords[0] > 424 and coords[0] <= 530:
+                            print("ERASER BUTTON")
+                        if coords[0] > 530 and coords[0] < 640:
+                            print("PEN BUTTON")
                     else:
                         #print(coords)
                         #print(paint.getWindowSize())
                         paint.updateCoords(640-coords[0],coords[1])
-                        
+
                 else:
                     print("NONE coords")
 
