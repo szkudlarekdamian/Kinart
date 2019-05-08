@@ -1,18 +1,18 @@
 import numpy as np
 import cv2
 from threading import Thread, Event
-import time
+import config
 
 #KEY OPTIONS
-checkingForHandInterval = 1
-howManyTimesHandMustBeFound = 5
-minimumValueToConsiderHand = 14
-maximumValueToConsiderHand = 17
-
-boundingBoxColorInit = (177, 187, 223)
-centerPointColorInit = (118, 100, 245)
-boundingBoxColorTracking = (173,245,145)
-centerPointColorTracking = (239,237,191)
+# checkingForHandInterval = 1
+# howManyTimesHandMustBeFound = 5
+# minimumValueToConsiderHand = 14
+# maximumValueToConsiderHand = 17
+#
+# boundingBoxColorInit = (177, 187, 223)
+# centerPointColorInit = (118, 100, 245)
+# boundingBoxColorTracking = (173,245,145)
+# centerPointColorTracking = (239,237,191)
 
 
 class MyThread(Thread):
@@ -24,15 +24,16 @@ class MyThread(Thread):
 
     def run(self):
         self.isRunning = True
-        global centerValue
-        while not self.stopped.wait(checkingForHandInterval):
+
+        while not self.stopped.wait(config.checkingForHandInterval):
             #print(centerValue)
-            if minimumValueToConsiderHand <= centerValue <= maximumValueToConsiderHand:
+            print(config.checkingForHandInterval, config.howManyTimesHandMustBeFound)
+            if config.minimumValueToConsiderHand <= config.centerValue <= config.maximumValueToConsiderHand:
                 self.found += 1
             else:
                 self.found = 1
                 #self.stopped.set()
-            if self.found == howManyTimesHandMustBeFound+1:
+            if self.found == config.howManyTimesHandMustBeFound+1:
                 self.isRunning = False
                 self.stopped.set()
 
@@ -70,8 +71,8 @@ class HandTracker(object):
         return frame
 
     def getFrameWithInitBox(self, frame):
-        cv2.circle(frame, (self.centerPoint[0], self.centerPoint[1]), 3, centerPointColorInit, 2)
-        cv2.rectangle(frame, (self.x1, self.y1), (self.x2, self.y2), boundingBoxColorInit, 2)
+        cv2.circle(frame, (self.centerPoint[0], self.centerPoint[1]), 3, config.centerPointColorInit, 2)
+        cv2.rectangle(frame, (self.x1, self.y1), (self.x2, self.y2), config.boundingBoxColorInit, config.boundingBoxBorderWidth, 2)
         return frame
 
     def filterDepth(self, frame, closestDistant, furthestDistant):
@@ -98,7 +99,7 @@ class HandTracker(object):
         return median
 
 
-    def filterFrame(self, frame, center, condition=5, kernelSize=3, iterations=1):
+    def filterFrame(self, frame, center, condition=2, kernelSize=3, iterations=1):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         median = np.uint8(np.median(center))
         frame = frame.astype(np.int)
@@ -136,12 +137,24 @@ class HandTracker(object):
         return max_contour, [cx, cy], boundRect
 
     def initTracker(self, frame):
+        cv2.imshow("Orion", frame)
+        cv2.waitKey(0)
         frame = self.enhanceFrame(frame)
+        cv2.imshow("Orion", frame)
+        cv2.waitKey(0)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cv2.imshow("Orion", gray)
+        cv2.waitKey(0)
         center = self.getNeighbourhoodROI(gray, self.centerPoint, 40)
         filtered = self.filterFrame(frame, center)
+        cv2.imshow("Orion", filtered)
+        cv2.waitKey(0)
         flood = self.floodFill(filtered)
+        cv2.imshow("Orion", flood)
+        cv2.waitKey(0)
         img, boundingBox = self.findHandContour(flood, drawContour=True)[0:4:3]
+        cv2.imshow("Orion", img)
+        cv2.waitKey(0)
         self.tracker.init(filtered, boundingBox)
 
     def trackHand(self, frame):
@@ -159,8 +172,8 @@ class HandTracker(object):
             #Pomyślny tracking
             p1 = (int(boundRect[0]), int(boundRect[1]))
             p2 = (int(boundRect[0] + boundRect[2]), int(boundRect[1] + boundRect[3]))
-            cv2.rectangle(color, p1, p2, boundingBoxColorTracking, 2, 1)
-            cv2.circle(color, ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2), 3, centerPointColorTracking, -1)
+            cv2.rectangle(color, p1, p2, config.boundingBoxColorTracking, config.boundingBoxBorderWidth, 1)
+            cv2.circle(color, ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2), 3, config.centerPointColorTracking, -1)
             coords = ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)
 
         else:
@@ -176,15 +189,15 @@ class HandTracker(object):
 
 
 #Ścieżka do filmu z mapą głębi lub ID kamery
-videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth4_v2.avi"
+videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth13.avi"
 
 #Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
 hT = HandTracker(videoPath)
 centerValue = 0
 
 while(hT.kinectOpened()):
-    cv2.waitKey(100)
-    hT.cap.set(cv2.CAP_PROP_POS_MSEC, 39550)
+    cv2.waitKey(20)
+    #hT.cap.set(cv2.CAP_PROP_POS_MSEC, 39550)
     #Sztuczne spowolnienie klatek, tylko do celów testowych
     #Pobieranie kolejnej klatki
     frame = hT.getNextFrame()
@@ -192,13 +205,13 @@ while(hT.kinectOpened()):
     if frame is not None:
         #Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
         if hT.handInitialized is False:
-            centerValue = hT.getValueOfCenter(frame)
+            config.centerValue = hT.getValueOfCenter(frame)
         # Pokaż klatkę z narysowaną przestrzenią na dłoń
-            cv2.imshow('Kinart',hT.getFrameWithInitBox(frame))
+            cv2.imshow('Kinart',hT.getFrameWithInitBox(frame.copy()))
         # Jeśli wątek jest już uruchomiony
             if hT.thread.isRunning:
                 # print("Hand found in thread: "+str(hT.thread.found))
-                if hT.thread.found == howManyTimesHandMustBeFound:
+                if hT.thread.found == config.howManyTimesHandMustBeFound:
                     print("Hand initialized")
                     hT.initTracker(frame)
                     hT.handInitialized = True
