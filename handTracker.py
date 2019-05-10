@@ -3,17 +3,6 @@ import cv2
 from threading import Thread, Event
 import config
 
-#KEY OPTIONS
-# checkingForHandInterval = 1
-# howManyTimesHandMustBeFound = 5
-# minimumValueToConsiderHand = 14
-# maximumValueToConsiderHand = 17
-#
-# boundingBoxColorInit = (177, 187, 223)
-# centerPointColorInit = (118, 100, 245)
-# boundingBoxColorTracking = (173,245,145)
-# centerPointColorTracking = (239,237,191)
-
 
 class MyThread(Thread):
     def __init__(self, event):
@@ -26,13 +15,10 @@ class MyThread(Thread):
         self.isRunning = True
 
         while not self.stopped.wait(config.checkingForHandInterval):
-            #print(centerValue)
-            print(config.checkingForHandInterval, config.howManyTimesHandMustBeFound)
             if config.minimumValueToConsiderHand <= config.centerValue <= config.maximumValueToConsiderHand:
                 self.found += 1
             else:
                 self.found = 1
-                #self.stopped.set()
             if self.found == config.howManyTimesHandMustBeFound+1:
                 self.isRunning = False
                 self.stopped.set()
@@ -40,7 +26,7 @@ class MyThread(Thread):
 class HandTracker(object):
     def __init__(self, source):
         self.cap = cv2.VideoCapture(source)
-        self.cap.set(cv2.CAP_PROP_POS_MSEC, 39500)
+        self.cap.set(cv2.CAP_PROP_POS_MSEC, 100000)
 
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -101,6 +87,9 @@ class HandTracker(object):
 
     def filterFrame(self, frame, center, condition=2, kernelSize=3, iterations=1):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        frame = higlightRectangleInImage(frame, (self.x1,self.y1), (self.x2, self.y2))
+
         median = np.uint8(np.median(center))
         frame = frame.astype(np.int)
         frame = np.where((abs(frame - int(median)) <= condition), 128, 0)
@@ -133,29 +122,19 @@ class HandTracker(object):
             cv2.circle(img, (cx, cy), 3, (0, 0, 255), -1)
             cv2.rectangle(img, (int(boundRect[0]), int(boundRect[1])),
                           (int(boundRect[0] + boundRect[2]), int(boundRect[1] + boundRect[3])), (255, 255, 0), 2)
-            return img, max_contour, [cx, cy], boundRect
-        return max_contour, [cx, cy], boundRect
+            return img, max_contour, boundRect
+        return max_contour, boundRect
 
     def initTracker(self, frame):
-        cv2.imshow("Orion", frame)
-        cv2.waitKey(0)
         frame = self.enhanceFrame(frame)
-        cv2.imshow("Orion", frame)
-        cv2.waitKey(0)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("Orion", gray)
-        cv2.waitKey(0)
         center = self.getNeighbourhoodROI(gray, self.centerPoint, 40)
         filtered = self.filterFrame(frame, center)
-        cv2.imshow("Orion", filtered)
-        cv2.waitKey(0)
         flood = self.floodFill(filtered)
-        cv2.imshow("Orion", flood)
-        cv2.waitKey(0)
-        img, boundingBox = self.findHandContour(flood, drawContour=True)[0:4:3]
-        cv2.imshow("Orion", img)
-        cv2.waitKey(0)
+        img, max_contour, boundingBox = self.findHandContour(flood, drawContour=True)
+
         self.tracker.init(filtered, boundingBox)
+
 
     def trackHand(self, frame):
         # if self.writer is None:
@@ -165,7 +144,10 @@ class HandTracker(object):
         color = frame.copy()
         frame = self.enhanceFrame(frame)
 
-        frame = self.filterDepth(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 10, 30)
+        frame = self.filterDepth(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), config.closestDistance, config.furthestDistance)
+
+        #cv2.imshow("Filtered", frame)
+        #cv2.waitKey(0)
 
         trackerUpdated, boundRect = self.tracker.update(frame)
         if trackerUpdated:
@@ -188,8 +170,21 @@ class HandTracker(object):
         return color, coords
 
 
+def angle_rad(v1, v2):
+    return np.rad2deg(np.arctan2(np.linalg.norm(np.cross(v1, v2)), np.dot(v1, v2)))
+
+
+def higlightRectangleInImage(image, p1, p2, grayValue=0):
+    imageCopy = image.copy()
+    height, width = image.shape[0:2]
+    for x in range(width):
+        for y in range(height):
+            if (x < p1[0] or y < p1[1]) or (x > p2[0] or y > p2[1]):
+                imageCopy[y, x] = grayValue
+    return imageCopy
+
 #Ścieżka do filmu z mapą głębi lub ID kamery
-videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth13.avi"
+videoPath = "C:\\Users\\Damian\\Documents\\Studia\\PT\\Kinart\\videokinec_depth12.avi"
 
 #Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
 hT = HandTracker(videoPath)
