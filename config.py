@@ -1,19 +1,21 @@
 #Hand initialization parameters
-checkingForHandInterval = 0.1
-howManyTimesHandMustBeFound = 6
-minimumValueToConsiderHand = 14
-maximumValueToConsiderHand = 17
+CHECKING_FOR_HAND_INTERVAL = 1
+HOW_MANY_TIMES_HAND_MUST_BE_FOUND = 5
+MINIMUM_VALUE_TO_CONSIDER_HAND = 14
+MAXIMUM_VALUE_TO_CONSIDER_HAND = 17
+MEDIAN_SQUARE_SIDE = 30
 
 #Bounding boxes style parameters
-boundingBoxColorInit = (177, 187, 223)
-centerPointColorInit = (118, 100, 245)
-boundingBoxColorTracking = (173,245,145)
-centerPointColorTracking = (239,237,191)
-boundingBoxBorderWidth = 4
+BOUNDING_BOX_COLOR_INIT = (177, 187, 223)
+CENTER_POINT_COLOR_INIT = (118, 100, 245)
+BOUNDING_BOX_COLOR_TRACKING = (173,245,145)
+CENTER_POINT_COLOR_TRACKING = (239,237,191)
+BOUNDING_BOX_BORDER_WIDTH = 4
 
 #Hand tracking parameters
-furthestDistance = 31
-closestDistance = 12
+FURTHEST_DISTANCE = 31
+CLOSEST_DISTANCE = 12
 
-
-centerValue = 0
+#Visuals
+SHOW_INIT_BOX_DURING_TRACKING = True
+SHOW_INIT_HAND_CONTOUR = True
