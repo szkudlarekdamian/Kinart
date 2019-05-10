@@ -1,12 +1,11 @@
 import tkinter as tk
 import time
-#import pyautogui
 import handTracker as ht
 import cv2
 
 class Kinart(object):
 
-    DEFAULT_PEN_SIZE = 5.0
+    DEFAULT_PEN_SIZE = 3.0
     DEFAULT_COLOR = 'black'
 
     def __init__(self):
@@ -77,13 +76,15 @@ class Kinart(object):
         return self.root.winfo_geometry()
 
     def updateCoords(self, x, y):
-        time.sleep(0.1)
+        #time.sleep(0.1)
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, x, y, width=self.line_width,
                                       fill=self.color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
         self.old_x = x
         self.old_y = y
         self.root.update()
+
+
 
     def setup(self):
         self.ispainting = False
@@ -101,12 +102,6 @@ class Kinart(object):
 
     def use_pen(self):
         self.activate_button(self.pen_button)
-
-    def getscreenwidth(self):
-        return self.swidth
-
-    def getscreenheight(self):
-        return self.sheight
 
     def green_color(self):
         self.eraser_on = False
@@ -146,7 +141,7 @@ class Kinart(object):
         self.activate_button(self.pen_button)
 
     def paint(self,event):
-        self.line_width = 20.0 if self.eraser_on else 5.0
+        self.line_width = 20.0 if self.eraser_on else self.DEFAULT_PEN_SIZE
         paint_color = 'white' if self.eraser_on else self.color
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, event.x, event.y,
@@ -158,76 +153,3 @@ class Kinart(object):
     def reset(self, event):
         self.old_x = None
         self.old_y = None
-
-if __name__ == '__main__':
-    #paint = Kinart()
-
-    # Ścieżka do filmu z mapą głębi lub ID kamery
-    videoPath = "C:\\Users\\marce\\Desktop\\videokinec_depth4_v2.avi"
-
-    # Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
-    hT = ht.HandTracker(videoPath)
-    #print(hT.width)
-    #print(hT.height)
-
-    # Obiekt klasy Kinart - rysowanie
-    paint = Kinart()
-
-    while (hT.kinectOpened()):
-        # Sztuczne spowolnienie klatek, tylko do celów testowych
-        #time.sleep(0.1)
-        # Pobieranie kolejnej klatki
-        frame = hT.getNextFrame()
-        # Jeśli klatka została wczytana poprawnie to kontynuuj
-        if frame is not None:
-            # Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
-            if hT.handInitialized is False:
-                # Pokaż klatkę z narysowaną przestrzenią na dłoń
-                cv2.imshow('Kinart', hT.getFrameWithInitBox(frame))
-                # Jeśli wciśnięto 'z' to rozpocznij inicjalizację dłoni
-                if cv2.waitKey(1) == ord('z'):
-                    hT.initTracker(frame)
-                    hT.handInitialized = True
-            # Jeśli dłoń została zainicjalizowana to
-            else:
-                # Śledź dłoń i uzyskaj jej współrzędne
-                frameWithCoords, coords = hT.trackHand(frame)
-                cv2.imshow('Kinart', frameWithCoords)
-                cv2.waitKey(1)
-
-                if coords != None:
-                    print(coords)
-
-                    if coords[0] < 0:
-                        print("Wrong coords !")
-                    elif coords[0] > 640:
-                        print("Wrong coords !")
-                    elif coords[1] <= 0:
-                        print("Wrong coords !")
-                    elif coords[1] > 480:
-                        print("Wrong coords !")
-                    elif coords[1] > 0 and coords[1] < 15:
-                        if coords[0] > 0 and coords[0] <= 106:
-                            print("BLACK BUTTON")
-                        if coords[0] > 106 and coords[0] <= 212:
-                            print("BLUE BUTTON")
-                        if coords[0] > 212 and coords[0] <= 318:
-                            print("RED BUTTON")
-                        if coords[0] > 318 and coords[0] <= 424:
-                            print("GREEN BUTTON")
-                        if coords[0] > 424 and coords[0] <= 530:
-                            print("ERASER BUTTON")
-                        if coords[0] > 530 and coords[0] < 640:
-                            print("PEN BUTTON")
-                    else:
-                        #print(coords)
-                        #print(paint.getWindowSize())
-                        paint.updateCoords(640-coords[0],coords[1])
-
-                else:
-                    print("NONE coords")
-
-        else:
-            break
-
-    paint.root.mainloop()
