@@ -153,3 +153,46 @@ class Kinart(object):
     def reset(self, event):
         self.old_x = None
         self.old_y = None
+
+
+
+############### DO MAIN'A ################
+
+# if coords != None:
+#     print("_____ GUI ______")
+#     print(coords)
+#
+#     if coords[0] < 0:
+#         print("Wrong coords !")
+#     elif coords[0] > 640:
+#         print("Wrong coords !")
+#     elif coords[1] <= 0:
+#         print("Wrong coords !")
+#     elif coords[1] > 480:
+#         print("Wrong coords !")
+#     elif coords[1] > 0 and coords[1] <= 50:
+#         if coords[0] > 0 and coords[0] <= 130:
+#             print("Black Button")
+#             paint.black_color()
+#         if coords[0] > 130 and coords[0] <= 230:
+#             print("Blue Button")
+#             paint.blue_color()
+#         if coords[0] > 230 and coords[0] <= 330:
+#             print("Red Button")
+#             paint.red_color()
+#         if coords[0] > 330 and coords[0] <= 430:
+#             print("Green Button")
+#             paint.green_color()
+#         if coords[0] > 430 and coords[0] <= 530:
+#             print("Eraser Button")
+#             paint.eraser_button()
+#         if coords[0] > 530 and coords[0] < 640:
+#             print("Pen Button")
+#             paint.pen_button()
+#     else:
+#         # print(coords)
+#         # print(paint.getWindowSize())
+#         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
+#
+# else:
+#     print("NONE coords")
