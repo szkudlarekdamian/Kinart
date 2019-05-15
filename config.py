@@ -3,7 +3,7 @@
 CHECKING_FOR_HAND_INTERVAL = 1
 
 # # Ile razy z rzędu musi zostać znaleziona dłoń w InitBox (powiązane z interwałem powyżej)
-HOW_MANY_TIMES_HAND_MUST_BE_FOUND = 5
+HOW_MANY_TIMES_HAND_MUST_BE_FOUND = 2
 
 # # Minimalna wartość odległości z sensorów Kinect, aby obiekt znalazł się w InitBox (im niższa wartość, tym bliżej
 # musimy być kamery)

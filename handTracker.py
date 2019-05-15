@@ -225,7 +225,7 @@ class HandTracker(object):
             cv2.putText(color, '(None, None)', (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
         # self.writer.write(color)
         color = self.getFrameWithInitBox(color, False)
-        return color, coords
+        return color, coords, gesture
 
 
 def angle_rad(v1, v2):
@@ -301,7 +301,7 @@ if __name__ == "__main__":
             # #Jeśli dłoń została zainicjalizowana to
             else:
                 # Śledź dłoń i uzyskaj jej współrzędne
-                frameWithCoords, coords = hT.trackHand(frame)
+                frameWithCoords, coords, gesture = hT.trackHand(frame)
                 cv2.imshow('Kinart', frameWithCoords)
 
                 if coords != None:
