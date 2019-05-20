@@ -108,7 +108,7 @@ if __name__ == "__main__":
             # #Jeśli dłoń została zainicjalizowana to
             else:
                 # Śledź dłoń i uzyskaj jej współrzędne
-                frameWithCoords, coords = hT.trackHand(frame)
+                frameWithCoords, coords, gesture = hT.trackHand(frame)
                 cv2.imshow('Kinart', frameWithCoords)
 
                 if coords != None:
