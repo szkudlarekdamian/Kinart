@@ -29,8 +29,7 @@ class MyThread(Thread):
 
 
 class HandTracker(object):
-    def __init__(self, source):
-        self.cap = cv2.VideoCapture(source)
+    def __init__(self):
         # self.cap.set(cv2.CAP_PROP_POS_MSEC, 100000)
 
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -51,6 +50,9 @@ class HandTracker(object):
         self.y2 = int(self.height * 0.35)
 
         self.centerPoint = [(self.x1 + self.x2) // 2, (self.y1 + self.y2) // 2]
+
+    def initCap(source):
+        self.cap = cv2.VideoCapture(source)
 
     def kinectOpened(self):
         return self.cap.isOpened()
