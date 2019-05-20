@@ -29,7 +29,8 @@ class MyThread(Thread):
 
 
 class HandTracker(object):
-    def __init__(self):
+    def __init__(self, source):
+        self.cap = cv2.VideoCapture(source)
         # self.cap.set(cv2.CAP_PROP_POS_MSEC, 100000)
 
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -216,6 +217,7 @@ class HandTracker(object):
             # Tracking failure
             cv2.putText(color, "Tracking failure detected", (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
             coords = None
+            gesture = 1
         if coords is not None:
             if gesture == 0:
                 gestureName = "FIST"
