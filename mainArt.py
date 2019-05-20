@@ -6,7 +6,28 @@ import kinect_video_recorder as kin
 import numpy as np
 import cv2
 
-def initializeHandWithFrame(ht, frame):
+class Gesture(object):
+    def __init__(self, startGesture=1, historyLen=5):
+        self.currentGesture = startGesture
+        self.gestureHistory = [startGesture]*historyLen
+
+    def getGesture(self):
+        return self.currentGesture
+
+    def checkGesture(self, newGesture):
+        print(self.gestureHistory)
+        self.gestureHistory = self.gestureHistory[1:]
+        self.gestureHistory.append(newGesture)
+        print(self.gestureHistory)
+        print(self.currentGesture)
+        print(" ")
+        if len(set(self.gestureHistory)) == 1:
+            self.currentGesture = self.gestureHistory[0]
+        elif len(set(self.gestureHistory)) != 2:
+            raise Exception('Error in gestureHistory')
+
+
+def initializeHandWithFrame(hT, frame):
     '''
     param1 : Instance of handTracker
     '''
@@ -65,7 +86,7 @@ def useInterfaceButton(paint, coords):
         paint.pen_button()
 
 
-def paintAndinteract(paint, coords):
+def paintAndinteract(paint, coords, gest):
     print("_____ GUI ______")
     print(coords)
 
@@ -73,15 +94,21 @@ def paintAndinteract(paint, coords):
         print("Wrong coords !")
     elif coords[1] > 0 and coords[1] <= 50:
         useInterfaceButton(paint, coords)
-    else:
+    #Jeśli gest nie jest pięścią
+    elif gest.getGesture() != 0:
         # print(coords)
         # print(paint.getWindowSize())
         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
+    # Jeśli gest jest pięścią
+    else:
+        print("piasteczka piasteczka piatunia")
 
 
 if __name__ == "__main__":
     source = 'kinect'
     # source = 'video'
+
+    videoPath = "/home/ciasterix/Kodzenie/Kinect/Kinart/videokinec_depth13.avi"
 
     if source == 'video':
         videoPath = "/home/ciasterix/Kodzenie/Kinect/Kinart/videokinec_depth13.avi"
@@ -89,10 +116,13 @@ if __name__ == "__main__":
         frame = kin.get_depth_with_3rd_layer()
     
     # Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
-    hT = HandTracker()
+    hT = HandTracker(videoPath)
     paint = GUI.Kinart()
+    gest = Gesture()
 
     while hT.kinectOpened():
+        cv2.waitKey(20)
+
         # Pobieranie kolejnej klatki
         if source == 'video':
             hT.cap.set(cv2.CAP_PROP_POS_MSEC, 39550)
@@ -104,15 +134,16 @@ if __name__ == "__main__":
         if frame is not None:
             # Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
             if hT.handInitialized is False:
-                initializeHandWithFrame(ht, frame)
+                initializeHandWithFrame(hT, frame)
             # #Jeśli dłoń została zainicjalizowana to
             else:
                 # Śledź dłoń i uzyskaj jej współrzędne
                 frameWithCoords, coords, gesture = hT.trackHand(frame)
+                gest.checkGesture(gesture)
                 cv2.imshow('Kinart', frameWithCoords)
 
                 if coords != None:
-                    paintAndinteract(paint, coords)
+                    paintAndinteract(paint, coords, gest)
                 else:
                     print("NONE coords")
         else:
