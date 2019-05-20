@@ -29,8 +29,7 @@ class MyThread(Thread):
 
 
 class HandTracker(object):
-    def __init__(self, source):
-        self.cap = cv2.VideoCapture(source)
+    def __init__(self):
         # self.cap.set(cv2.CAP_PROP_POS_MSEC, 100000)
 
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -51,6 +50,9 @@ class HandTracker(object):
         self.y2 = int(self.height * 0.35)
 
         self.centerPoint = [(self.x1 + self.x2) // 2, (self.y1 + self.y2) // 2]
+
+    def initCap(source):
+        self.cap = cv2.VideoCapture(source)
 
     def kinectOpened(self):
         return self.cap.isOpened()
@@ -225,7 +227,7 @@ class HandTracker(object):
             cv2.putText(color, '(None, None)', (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
         # self.writer.write(color)
         color = self.getFrameWithInitBox(color, False)
-        return color, coords
+        return color, coords, gesture
 
 
 def angle_rad(v1, v2):
@@ -301,7 +303,7 @@ if __name__ == "__main__":
             # #Jeśli dłoń została zainicjalizowana to
             else:
                 # Śledź dłoń i uzyskaj jej współrzędne
-                frameWithCoords, coords = hT.trackHand(frame)
+                frameWithCoords, coords, gesture = hT.trackHand(frame)
                 cv2.imshow('Kinart', frameWithCoords)
 
                 if coords != None:
