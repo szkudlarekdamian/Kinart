@@ -1,5 +1,9 @@
 import tkinter as tk
 import time
+
+import PIL
+from PIL import ImageDraw
+
 import handTracker as ht
 import cv2
 
@@ -26,7 +30,7 @@ class Kinart(object):
         self.pen_button.grid(row=0, column=0, sticky='NSEW')
 
         # ERASER BUTTON
-        self.eraser_button = tk.Button(self.root, text='eraser', height=3, width=5, command=self.use_eraser)
+        self.eraser_button = tk.Button(self.root, text='ERASER', height=3, width=5, command=self.use_eraser)
         self.eraser_button.grid(row=0, column=1, sticky='NSEW')
 
         # 4 COLORS
@@ -39,9 +43,16 @@ class Kinart(object):
         self.color_button4 = tk.Button(self.root, bg='black', height=3, width=5, command=self.black_color)
         self.color_button4.grid(row=0, column=5, sticky='NSEW')
 
+        self.save_button = tk.Button(self.root, text="SAVE", height=3, width=5, command=self.save)
+        self.save_button.grid(row=0, column=6, sticky='NSEW')
+
         # PAINTING
-        self.painting = tk.Canvas(self.root, bg='white', width=640, height=480)
-        self.painting.grid(row=1, columnspan=6, sticky='NSEW')
+        self.painting = tk.Canvas(self.root, bg='white')
+        self.painting.grid(row=1, columnspan=7, sticky='NSEW')
+
+        # TO SAVE
+        self.image = PIL.Image.new("RGB", (640,430), (255, 255, 255))
+        self.draw = ImageDraw.Draw(self.image)
 
         # AUTORESIZE ELEMENTS
         self.root.grid_columnconfigure(0, weight=1)
@@ -50,6 +61,7 @@ class Kinart(object):
         self.root.grid_columnconfigure(3, weight=1)
         self.root.grid_columnconfigure(4, weight=1)
         self.root.grid_columnconfigure(5, weight=1)
+        self.root.grid_columnconfigure(6, weight=1)
         self.root.grid_rowconfigure(0, weight=0)
         self.root.grid_rowconfigure(1, weight=1)
 
@@ -71,6 +83,11 @@ class Kinart(object):
 
         #self.root.mainloop()
 
+    def save(self):
+        self.activate_button(self.save_button)
+        filename = "painting.jpg"
+        self.image.save(filename)
+
     def getWindowSize(self):
         self.root.update()
         return self.root.winfo_geometry()
@@ -80,10 +97,11 @@ class Kinart(object):
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, x, y, width=self.line_width,
                                       fill=self.color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
+            self.draw.line([self.old_x, self.old_y, x, y], width=self.line_width,
+                                      fill=self.color)
         self.old_x = x
         self.old_y = y
         self.root.update()
-
 
 
     def setup(self):
@@ -102,12 +120,6 @@ class Kinart(object):
 
     def use_pen(self):
         self.activate_button(self.pen_button)
-
-    def getscreenwidth(self):
-        return self.swidth
-
-    def getscreenheight(self):
-        return self.sheight
 
     def green_color(self):
         self.eraser_on = False
@@ -147,12 +159,13 @@ class Kinart(object):
         self.activate_button(self.pen_button)
 
     def paint(self,event):
-        self.line_width = 20.0 if self.eraser_on else 5.0
+        self.line_width = 20.0 if self.eraser_on else self.DEFAULT_PEN_SIZE
         paint_color = 'white' if self.eraser_on else self.color
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, event.x, event.y,
                                width=self.line_width, fill=paint_color,
                                capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
+
         self.old_x = event.x
         self.old_y = event.y
 
@@ -163,11 +176,11 @@ class Kinart(object):
 
 
 ############### DO MAIN'A ################
-
+#
 # if coords != None:
 #     print("_____ GUI ______")
 #     print(coords)
-#
+# 
 #     if coords[0] < 0:
 #         print("Wrong coords !")
 #     elif coords[0] > 640:
@@ -177,19 +190,22 @@ class Kinart(object):
 #     elif coords[1] > 480:
 #         print("Wrong coords !")
 #     elif coords[1] > 0 and coords[1] <= 50:
-#         if coords[0] > 0 and coords[0] <= 130:
+#         if coords[0] > 0 and coords[0] <= 90:  # 130
+#             print("SAVE Button")
+#             paint.save()
+#         if coords[0] > 90 and coords[0] <= 180:  # 130
 #             print("Black Button")
 #             paint.black_color()
-#         if coords[0] > 130 and coords[0] <= 230:
+#         if coords[0] > 180 and coords[0] <= 270:
 #             print("Blue Button")
 #             paint.blue_color()
-#         if coords[0] > 230 and coords[0] <= 330:
+#         if coords[0] > 270 and coords[0] <= 360:
 #             print("Red Button")
 #             paint.red_color()
-#         if coords[0] > 330 and coords[0] <= 430:
+#         if coords[0] > 360 and coords[0] <= 450:
 #             print("Green Button")
 #             paint.green_color()
-#         if coords[0] > 430 and coords[0] <= 530:
+#         if coords[0] > 450 and coords[0] <= 530:
 #             print("Eraser Button")
 #             paint.eraser_button()
 #         if coords[0] > 530 and coords[0] < 640:
