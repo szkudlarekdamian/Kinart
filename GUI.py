@@ -1,12 +1,11 @@
 import tkinter as tk
 import time
-#import pyautogui
 import handTracker as ht
 import cv2
 
 class Kinart(object):
 
-    DEFAULT_PEN_SIZE = 5.0
+    DEFAULT_PEN_SIZE = 3.0
     DEFAULT_COLOR = 'black'
 
     def __init__(self):
@@ -17,13 +16,13 @@ class Kinart(object):
         self.sheight, self.swidth = self.root.winfo_screenheight(), self.root.winfo_screenwidth()
         #self.root.geometry('{}x{}'.format(swidth,sheight))
         #self.root.geometry('640x480+-8+-8')
-        #self.root.geometry('1536x801+-8+-8')
+        self.root.geometry('640x480')
 
         #self.frame = tk.Frame(self.root, bg='red')
         #self.frame.pack(side="LEFT", fill='BOTH')
 
         # PEN BUTTON
-        self.pen_button = tk.Button(frame, text='PEN', height=3, width=5, command=self.use_pen)
+        self.pen_button = tk.Button(self.root, text='PEN', height=3, width=5, command=self.use_pen)
         self.pen_button.grid(row=0, column=0, sticky='NSEW')
 
         # ERASER BUTTON
@@ -55,10 +54,6 @@ class Kinart(object):
         self.root.grid_rowconfigure(1, weight=1)
 
         self.root.update()
-        self.button1W = self.color_button1.winfo_width()
-        self.button1H = self.color_button1.winfo_height()
-        print(self.button1H)
-        print(self.button1W)
         self.setup()
 
         #while True:
@@ -81,13 +76,15 @@ class Kinart(object):
         return self.root.winfo_geometry()
 
     def updateCoords(self, x, y):
-        time.sleep(0.1)
+        #time.sleep(0.1)
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, x, y, width=self.line_width,
                                       fill=self.color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
         self.old_x = x
         self.old_y = y
         self.root.update()
+
+
 
     def setup(self):
         self.ispainting = False
@@ -163,59 +160,45 @@ class Kinart(object):
         self.old_x = None
         self.old_y = None
 
-if __name__ == '__main__':
-    #paint = Kinart()
 
-    # Ścieżka do filmu z mapą głębi lub ID kamery
-    videoPath = "C:\\Users\\marce\\Desktop\\videokinec_depth4_v2.avi"
 
-    # Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
-    hT = ht.HandTracker(videoPath)
-    print(hT.width)
-    print(hT.height)
+############### DO MAIN'A ################
 
-    # Obiekt klasy Kinart - rysowanie
-    paint = Kinart()
-
-    while (hT.kinectOpened()):
-        # Sztuczne spowolnienie klatek, tylko do celów testowych
-        #time.sleep(0.1)
-        # Pobieranie kolejnej klatki
-        frame = hT.getNextFrame()
-        # Jeśli klatka została wczytana poprawnie to kontynuuj
-        if frame is not None:
-            # Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
-            if hT.handInitialized is False:
-                # Pokaż klatkę z narysowaną przestrzenią na dłoń
-                cv2.imshow('Kinart', hT.getFrameWithInitBox(frame))
-                # Jeśli wciśnięto 'z' to rozpocznij inicjalizację dłoni
-                if cv2.waitKey(1) == ord('z'):
-                    hT.initTracker(frame)
-                    hT.handInitialized = True
-            # Jeśli dłoń została zainicjalizowana to
-            else:
-                # Śledź dłoń i uzyskaj jej współrzędne
-                frameWithCoords, coords = hT.trackHand(frame)
-                cv2.imshow('Kinart', frameWithCoords)
-                cv2.waitKey(1)
-
-                if coords != None:
-                    if coords[0] < 0:
-                        print()
-                    elif coords[0] > paint.getscreenwidth():
-                        print()
-                    elif coords[1] < 0:
-                        print()
-                    elif coords[1] > paint.getscreenheight():
-                        print()
-                    else:
-                        #print(coords)
-                        print(paint.getWindowSize())
-                        paint.updateCoords(coords[0],coords[1])
-                else:
-                    print("NONE coords")
-
-        else:
-            break
-
-    paint.root.mainloop()
+# if coords != None:
+#     print("_____ GUI ______")
+#     print(coords)
+#
+#     if coords[0] < 0:
+#         print("Wrong coords !")
+#     elif coords[0] > 640:
+#         print("Wrong coords !")
+#     elif coords[1] <= 0:
+#         print("Wrong coords !")
+#     elif coords[1] > 480:
+#         print("Wrong coords !")
+#     elif coords[1] > 0 and coords[1] <= 50:
+#         if coords[0] > 0 and coords[0] <= 130:
+#             print("Black Button")
+#             paint.black_color()
+#         if coords[0] > 130 and coords[0] <= 230:
+#             print("Blue Button")
+#             paint.blue_color()
+#         if coords[0] > 230 and coords[0] <= 330:
+#             print("Red Button")
+#             paint.red_color()
+#         if coords[0] > 330 and coords[0] <= 430:
+#             print("Green Button")
+#             paint.green_color()
+#         if coords[0] > 430 and coords[0] <= 530:
+#             print("Eraser Button")
+#             paint.eraser_button()
+#         if coords[0] > 530 and coords[0] < 640:
+#             print("Pen Button")
+#             paint.pen_button()
+#     else:
+#         # print(coords)
+#         # print(paint.getWindowSize())
+#         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
+#
+# else:
+#     print("NONE coords")
