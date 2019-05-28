@@ -101,6 +101,7 @@ def paintAndinteract(paint, coords, gest):
         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
     # Jeśli gest jest pięścią
     else:
+        paint.reset()
         print("piasteczka piasteczka piatunia")
 
 
