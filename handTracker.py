@@ -162,7 +162,7 @@ class HandTracker(object):
         defects = cv2.convexityDefects(max_contour, hull)
 
         num_fingers = 1
-        print(cv2.contourArea(max_contour))
+        # print(cv2.contourArea(max_contour))
         for i in range(defects.shape[0]):
             start_index, end_index, farthest_index, _ = defects[i, 0]
             start = tuple(max_contour[start_index][0])
@@ -274,7 +274,7 @@ if __name__ == "__main__":
     while hT.kinectOpened():
         print("petla")
 
-        cv2.waitKey(20)
+        cv2.waitKey(1)
         # hT.cap.set(cv2.CAP_PROP_POS_MSEC, 39550)
         # Sztuczne spowolnienie klatek, tylko do celów testowych
         # Pobieranie kolejnej klatki

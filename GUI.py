@@ -169,7 +169,7 @@ class Kinart(object):
         self.old_x = event.x
         self.old_y = event.y
 
-    def reset(self, event):
+    def reset(self):
         self.old_x = None
         self.old_y = None
 
