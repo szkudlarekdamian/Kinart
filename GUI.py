@@ -123,7 +123,7 @@ class Kinart(object):
     def red_color(self):
         self.eraser_on = False
         self.color = 'red'
-        self.activate_button_color(self.red_buttond)
+        self.activate_button_color(self.red_button)
 
     def blue_color(self):
         self.eraser_on = False
