@@ -74,6 +74,7 @@ class Kinart(object):
         self.ispainting = False
         self.old_x = 0
         self.old_y = 0
+        self.old_dot = None
         self.line_width = 20
         self.color = self.DEFAULT_COLOR
         self.eraser_on = False
@@ -90,6 +91,14 @@ class Kinart(object):
             self.draw.line([self.old_x, self.old_y, x, y], width=self.line_width, fill=self.color)
         self.old_x = x
         self.old_y = y
+        self.root.update()
+
+    def createDot(self, x, y):
+        if self.old_dot:
+            self.painting.delete(self.old_dot)
+            self.root.update()
+        dot = self.painting.create_oval(x, y, x+15, y+15, width=10.0, fill='black')
+        self.old_dot = dot
         self.root.update()
 
     def save(self):
@@ -141,47 +150,3 @@ class Kinart(object):
     def reset(self):
         self.old_x = None
         self.old_y = None
-
-############### DO MAIN'A ################
-#
-# if coords != None:
-#     print("_____ GUI ______")
-#     print(coords)
-# 
-#     if coords[0] < 0:
-#         print("Wrong coords !")
-#     elif coords[0] > 640:
-#         print("Wrong coords !")
-#     elif coords[1] <= 0:
-#         print("Wrong coords !")
-#     elif coords[1] > 480:
-#         print("Wrong coords !")
-#     elif coords[1] > 0 and coords[1] <= 50:
-#         if coords[0] > 0 and coords[0] <= 90:  # 130
-#             print("SAVE Button")
-#             paint.save()
-#         if coords[0] > 90 and coords[0] <= 180:  # 130
-#             print("Black Button")
-#             paint.black_color()
-#         if coords[0] > 180 and coords[0] <= 270:
-#             print("Blue Button")
-#             paint.blue_color()
-#         if coords[0] > 270 and coords[0] <= 360:
-#             print("Red Button")
-#             paint.red_color()
-#         if coords[0] > 360 and coords[0] <= 450:
-#             print("Green Button")
-#             paint.green_color()
-#         if coords[0] > 450 and coords[0] <= 530:
-#             print("Eraser Button")
-#             paint.eraser_button()
-#         if coords[0] > 530 and coords[0] < 640:
-#             print("Pen Button")
-#             paint.pen_button()
-#     else:
-#         # print(coords)
-#         # print(paint.getWindowSize())
-#         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
-#
-# else:
-#     print("NONE coords")
