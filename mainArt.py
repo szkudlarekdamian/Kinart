@@ -104,10 +104,10 @@ def useInterfaceButton(paint, coords):
         paint.green_color()
     if coords[0] > 450 and coords[0] <= 530:
         print("Eraser Button")
-        paint.eraser_button()
+        paint.use_eraser()
     if coords[0] > 530 and coords[0] < 640:
         print("Pen Button")
-        paint.pen_button()
+        paint.use_pen()
 
 
 def paintAndinteract(paint, coords, gest):
