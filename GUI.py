@@ -84,7 +84,7 @@ class Kinart(object):
         self.activate_button_color(self.active_button_color)
 
     def updateCoords(self, x, y):
-        self.line_width = 20.0 if self.eraser_on else 5.0
+        self.line_width = 20 if self.eraser_on else 5
         paint_color = 'white' if self.eraser_on else self.color
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, x, y, width=self.line_width, fill=paint_color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
