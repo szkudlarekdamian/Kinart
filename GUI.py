@@ -108,6 +108,7 @@ class Kinart(object):
         self.image.save(filename)
 
     def use_pen(self):
+        self.active_button_color.config(relief=tk.SUNKEN)
         self.activate_button(self.pen_button)
 
     def use_eraser(self):
