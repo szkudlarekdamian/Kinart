@@ -88,25 +88,25 @@ def useInterfaceButton(paint, coords):
     param2 : coordinates as tuple of integers
     '''
     if coords[0] > 0 and coords[0] <= 90:  # 130
-        print("SAVE Button")
+        #print("SAVE Button")
         paint.save()
     if coords[0] > 90 and coords[0] <= 180:  # 130
-        print("Black Button")
+        #print("Black Button")
         paint.black_color()
     if coords[0] > 180 and coords[0] <= 270:
-        print("Blue Button")
+        #print("Blue Button")
         paint.blue_color()
     if coords[0] > 270 and coords[0] <= 360:
-        print("Red Button")
+        #print("Red Button")
         paint.red_color()
     if coords[0] > 360 and coords[0] <= 450:
-        print("Green Button")
+        #print("Green Button")
         paint.green_color()
     if coords[0] > 450 and coords[0] <= 530:
-        print("Eraser Button")
+        #print("Eraser Button")
         paint.use_eraser()
     if coords[0] > 530 and coords[0] < 640:
-        print("Pen Button")
+        #print("Pen Button")
         paint.use_pen()
 
 
@@ -122,6 +122,7 @@ def paintAndinteract(paint, coords, gest):
     elif gest.getGesture() != 0:
         # print(coords)
         # print(paint.getWindowSize())
+        paint.resetDot()
         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
     # Jeśli gest jest pięścią
     else:

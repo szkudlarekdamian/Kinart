@@ -88,7 +88,7 @@ class Kinart(object):
         paint_color = 'white' if self.eraser_on else self.color
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, x, y, width=self.line_width, fill=paint_color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
-            self.draw.line([self.old_x, self.old_y, x, y], width=self.line_width, fill=self.color)
+            self.draw.line([self.old_x, self.old_y, x, y], width=self.line_width, fill=paint_color)
         self.old_x = x
         self.old_y = y
         self.root.update()
@@ -97,9 +97,14 @@ class Kinart(object):
         if self.old_dot:
             self.painting.delete(self.old_dot)
             self.root.update()
-        dot = self.painting.create_oval(x, y, x+15, y+15, width=10.0, fill='black')
+        dot = self.painting.create_oval(x, y, x+15, y+15, width=10.0, fill=self.color)
         self.old_dot = dot
         self.root.update()
+
+    def resetDot(self):
+        if self.old_dot:
+            self.painting.delete(self.old_dot)
+            self.root.update()
 
     def save(self):
         self.active_button_color.config(relief=tk.RAISED)
