@@ -43,13 +43,11 @@ def create_depth_and_colour_recordings(colour_video_name, depth_video_name):
 
     return video_colour, video_depth
 
-
 if __name__ == "__main__":
     colour_video_name = 'videokinec_colour0.avi'
     depth_video_name = 'videokinec_depth0.avi'
 
-    video_colour, video_depth = create_depth_and_colour_recordings(colour_video_name,
-                                                                    depth_video_name)
+    video_colour, video_depth = create_depth_and_colour_recordings(colour_video_name, depth_video_name)
 
     print('Creating files for videos:', colour_video_name, ' and ', depth_video_name)
 

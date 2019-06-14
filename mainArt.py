@@ -3,7 +3,6 @@ import config
 import globals
 import GUI
 import kinect_video_recorder as kin
-import numpy as np
 import cv2
 
 class Gesture(object):
@@ -15,17 +14,12 @@ class Gesture(object):
         return self.currentGesture
 
     def checkGesture(self, newGesture):
-        # print(self.gestureHistory)
         self.gestureHistory = self.gestureHistory[1:]
         self.gestureHistory.append(newGesture)
-        # print(self.gestureHistory)
-        # print(self.currentGesture)
-        # print(" ")
         if len(set(self.gestureHistory)) == 1:
             self.currentGesture = self.gestureHistory[0]
         elif len(set(self.gestureHistory)) != 2:
             raise Exception('Error in gestureHistory')
-
 
 def initializeHandWithFrame(hT, frame):
     '''
@@ -33,13 +27,10 @@ def initializeHandWithFrame(hT, frame):
     param2 : picture as numpy array
     '''
     globals.CENTER_VALUE = hT.getValueOfCenter(frame)
-    # print("Center get value", hT.getValueOfCenter(frame))
     
     if config.MINIMUM_VALUE_TO_CONSIDER_HAND > globals.CENTER_VALUE:
-        # print('too close')
         frame = writeDistanceInfoOnFrame(frame, 'too close')
     elif globals.CENTER_VALUE > config.MAXIMUM_VALUE_TO_CONSIDER_HAND:
-        # print('too far')
         frame = writeDistanceInfoOnFrame(frame, 'too far')
 
     # Pokaż klatkę z narysowaną przestrzenią na dłoń
@@ -47,7 +38,6 @@ def initializeHandWithFrame(hT, frame):
     cv2.imshow('Kinart', frame)
     # Jeśli wątek jest już uruchomiony
     if hT.thread.isRunning:
-        # print("Hand found in thread: "+str(hT.thread.found))
         if hT.thread.found == config.HOW_MANY_TIMES_HAND_MUST_BE_FOUND:
             print("Hand initialized")
             hT.initTracker(frame)
@@ -58,7 +48,6 @@ def initializeHandWithFrame(hT, frame):
         hT.thread = MyThread(hT.stopFlag)
         hT.thread.start()
 
-
 def writeDistanceInfoOnFrame(frame, text):
     font = cv2.FONT_HERSHEY_SIMPLEX
     bottomLeftCornerOfText = (50,50)
@@ -67,8 +56,6 @@ def writeDistanceInfoOnFrame(frame, text):
     lineType = 2
     cv2.putText(frame, text, bottomLeftCornerOfText, font, fontScale, fontColor, lineType)
     return frame
-
-
 
 def checkCoordsCorrectness(coords):
     '''
@@ -81,59 +68,41 @@ def checkCoordsCorrectness(coords):
         return False
     return True
 
-
 def useInterfaceButton(paint, coords):
     '''
     param1 : instance of Kinart class from GUI
     param2 : coordinates as tuple of integers
     '''
     if coords[0] > 0 and coords[0] <= 90:  # 130
-        #print("SAVE Button")
         paint.save()
     if coords[0] > 90 and coords[0] <= 180:  # 130
-        #print("Black Button")
         paint.black_color()
     if coords[0] > 180 and coords[0] <= 270:
-        #print("Blue Button")
         paint.blue_color()
     if coords[0] > 270 and coords[0] <= 360:
-        #print("Red Button")
         paint.red_color()
     if coords[0] > 360 and coords[0] <= 450:
-        #print("Green Button")
         paint.green_color()
     if coords[0] > 450 and coords[0] <= 530:
-        #print("Eraser Button")
         paint.use_eraser()
     if coords[0] > 530 and coords[0] < 640:
-        #print("Pen Button")
         paint.use_pen()
 
-
 def paintAndinteract(paint, coords, gest):
-    # print("_____ GUI ______")
-    # print(coords)
-
     if not checkCoordsCorrectness:
         print("Wrong coords !")
     elif coords[1] > 0 and coords[1] <= 50:
         useInterfaceButton(paint, coords)
     #Jeśli gest nie jest pięścią
     elif gest.getGesture() != 0:
-        # print(coords)
-        # print(paint.getWindowSize())
         paint.resetDot()
         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
     # Jeśli gest jest pięścią
     else:
         paint.reset()
         paint.createDot((640 - coords[0]), (coords[1] - 50))
-        # print("piasteczka piasteczka piatunia")
-
 
 def rescale_coords(coords, scale=2):
-    # print("")
-    # print("old_coords:", coords)
     coords = list(coords)
     coords[0] -= 640 / (2 * scale)
     coords[0] *= scale
@@ -152,14 +121,12 @@ def rescale_coords(coords, scale=2):
     elif coords[1] < 0:
         coords[1] = 0
 
-    coords = tuple(coords)    
-    # print("new_coords:", coords)    
+    coords = tuple(coords)
     return coords
 
 
 if __name__ == "__main__":
     source = 'kinect'
-    # source = 'video'
 
     videoPath = "/home/ciasterix/Kodzenie/Kinect/Kinart/videokinec_depth13.avi"
 
@@ -199,7 +166,6 @@ if __name__ == "__main__":
                     coords = rescale_coords(coords)
                     paintAndinteract(paint, coords, gest)
                 else:
-                    print("NONE coords")
                     hT.tracker = cv2.TrackerCSRT_create()
                     hT.handInitialized = False
         else:
