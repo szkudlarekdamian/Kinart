@@ -228,7 +228,8 @@ class HandTracker(object):
         else:
             cv2.putText(color, '(None, None)', (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
         # self.writer.write(color)
-        color = self.getFrameWithInitBox(color, False)
+        if config.SHOW_INIT_BOX_DURING_TRACKING: 
+            color = self.getFrameWithInitBox(color, False)
         return color, coords, gesture
 
 

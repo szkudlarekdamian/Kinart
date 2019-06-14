@@ -44,7 +44,7 @@ CLOSEST_DISTANCE = 12
 
 # VISUALS
 # # Czy InitBox ma być wyświetlany w trakcie śledzenia dłoni
-SHOW_INIT_BOX_DURING_TRACKING = True
+SHOW_INIT_BOX_DURING_TRACKING = False
 
 # # Czy pomocniczy kontur dłoni ma być wyświetlany w InitBox
 SHOW_INIT_HAND_CONTOUR = True

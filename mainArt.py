@@ -107,7 +107,7 @@ def useInterfaceButton(paint, coords):
         paint.use_eraser()
     if coords[0] > 530 and coords[0] < 640:
         #print("Pen Button")
-        paint.use_pen()
+        paint.resetCanvas()
 
 
 def paintAndinteract(paint, coords, gest):
@@ -187,6 +187,7 @@ if __name__ == "__main__":
         if frame is not None:
             # Jeśli dłoń nie została jeszcze zainicjalizowana do systemu
             if hT.handInitialized is False:
+                paint.resetDot()
                 initializeHandWithFrame(hT, frame)
             # #Jeśli dłoń została zainicjalizowana to
             else:

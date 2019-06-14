@@ -20,7 +20,7 @@ class Kinart(object):
         self.root.geometry('640x480')
 
         # PEN BUTTON
-        self.pen_button = tk.Button(self.root, text='PEN', height=3, width=5, command=self.use_pen)
+        self.pen_button = tk.Button(self.root, text='RESET', height=3, width=5, command=self.resetCanvas)
         self.pen_button.grid(row=0, column=0, sticky='NSEW')
 
         # ERASER BUTTON
@@ -84,7 +84,7 @@ class Kinart(object):
         self.activate_button_color(self.active_button_color)
 
     def updateCoords(self, x, y):
-        self.line_width = 20 if self.eraser_on else 5
+        self.line_width = 20 if self.eraser_on else 8
         paint_color = 'white' if self.eraser_on else self.color
         if self.old_x and self.old_y:
             self.painting.create_line(self.old_x, self.old_y, x, y, width=self.line_width, fill=paint_color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=36)
@@ -97,7 +97,10 @@ class Kinart(object):
         if self.old_dot:
             self.painting.delete(self.old_dot)
             self.root.update()
-        dot = self.painting.create_oval(x, y, x+15, y+15, width=10.0, fill=self.color)
+        if self.eraser_on:
+            dot = self.painting.create_oval(x, y, x+15, y+15, width=10.0, fill='white')
+        else:    
+            dot = self.painting.create_oval(x, y, x+15, y+15, width=10.0, fill=self.color)
         self.old_dot = dot
         self.root.update()
 
@@ -112,9 +115,10 @@ class Kinart(object):
         filename = "painting.jpg"
         self.image.save(filename)
 
-    def use_pen(self):
-        self.active_button_color.config(relief=tk.SUNKEN)
-        self.activate_button(self.pen_button)
+    def resetCanvas(self):
+        self.painting.delete("all")
+        self.image = PIL.Image.new("RGB", (640,430), (255, 255, 255))
+        self.draw = ImageDraw.Draw(self.image)        
 
     def use_eraser(self):
         self.active_button_color.config(relief=tk.RAISED)
