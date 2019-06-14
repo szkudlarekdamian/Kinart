@@ -6,8 +6,6 @@ import globals
 import kinect_video_recorder as kin
 import GUI
 
-
-
 class MyThread(Thread):
     def __init__(self, event):
         Thread.__init__(self)
@@ -31,14 +29,10 @@ class MyThread(Thread):
 class HandTracker(object):
     def __init__(self, source):
         self.cap = cv2.VideoCapture(source)
-        # self.cap.set(cv2.CAP_PROP_POS_MSEC, 100000)
 
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.handInitialized = False
-
-        # self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        # self.writer = cv2.VideoWriter("MOSSE.avi", self.fourcc, 10.0, (640, 480), True)
 
         self.tracker = cv2.TrackerCSRT_create()
 
@@ -142,13 +136,8 @@ class HandTracker(object):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         center = self.getNeighbourhoodROI(gray, self.centerPoint, 40)
         filtered = self.filterFrame(frame, center)
-        # showPausedImage(filtered)
         flood = self.floodFill(filtered)
-        # showPausedImage(flood)
         img, max_contour, boundingBox = self.findHandContour(flood, drawContour=True)
-        # showPausedImage(img)
-
-        # self.gestureRecognition(flood, (self.x1,self.y1), (self.x2, self.y2))
         self.tracker.init(filtered, boundingBox)
 
     def gestureRecognition(self, frame, p1, p2, offset=5):
@@ -162,7 +151,6 @@ class HandTracker(object):
         defects = cv2.convexityDefects(max_contour, hull)
 
         num_fingers = 1
-        # print(cv2.contourArea(max_contour))
         for i in range(defects.shape[0]):
             start_index, end_index, farthest_index, _ = defects[i, 0]
             start = tuple(max_contour[start_index][0])
@@ -170,11 +158,9 @@ class HandTracker(object):
             far = tuple(max_contour[farthest_index][0])
 
             cv2.line(img_draw, start, end, (0, 255, 0), 2)
-            # print(angle_rad(np.subtract(start, far), np.subtract(end, far)))
             if angle_rad(np.subtract(start, far), np.subtract(end, far)) < 80:
                 num_fingers += 1
 
-            # print(num_fingers)
         if num_fingers == 1:
             cv2.putText(img_draw, str(num_fingers) + " FIST " + str(defects.shape[0]), (20, 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
@@ -184,22 +170,14 @@ class HandTracker(object):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
             num_fingers = 1
 
-        # cv2.imshow("Hulls", img_draw)
         return max_contour, num_fingers
 
     def trackHand(self, frame):
-        # if self.writer is None:
-        #     self.fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        #     self.writer = cv2.VideoWriter("outputAA.avi", self.fourcc, 10.0,
-        #                              (frame.shape[1], frame.shape[0]), True)
         color = frame.copy()
         frame = self.enhanceFrame(frame)
 
         frame = self.filterDepth(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), config.CLOSEST_DISTANCE,
                                  config.FURTHEST_DISTANCE)
-
-        # cv2.imshow("Filtered", frame)
-        # cv2.waitKey(0)
 
         trackerUpdated, boundRect = self.tracker.update(frame)
         if trackerUpdated:
@@ -208,7 +186,6 @@ class HandTracker(object):
             p2 = (int(boundRect[0] + boundRect[2]), int(boundRect[1] + boundRect[3]))
 
             contour, gesture = self.gestureRecognition(frame, p1, p2)
-            #cv2.drawContours(color, contour, -1, (0, 255, 0), 2)
             cv2.rectangle(color, p1, p2, config.BOUNDING_BOX_COLOR_TRACKING, config.BOUNDING_BOX_BORDER_WIDTH, 1)
             cv2.circle(color, ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2), 3, config.CENTER_POINT_COLOR_TRACKING, -1)
             coords = ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)
@@ -236,7 +213,6 @@ class HandTracker(object):
 def angle_rad(v1, v2):
     return np.rad2deg(np.arctan2(np.linalg.norm(np.cross(v1, v2)), np.dot(v1, v2)))
 
-
 def higlightRectangleInImage(image, p1, p2, offset=0, grayValue=0):
     imageCopy = image.copy()
     height, width = image.shape[0:2]
@@ -246,7 +222,6 @@ def higlightRectangleInImage(image, p1, p2, offset=0, grayValue=0):
                 imageCopy[y, x] = grayValue
     return imageCopy
 
-
 def drawContour(image, contour, color=(0, 0, 255)):
     imageCopy = image.copy()
     previousPoint = contour[0]
@@ -255,17 +230,17 @@ def drawContour(image, contour, color=(0, 0, 255)):
         previousPoint = point
     return imageCopy
 
-
 def showPausedImage(image):
     cv2.imshow("Image", image)
     cv2.waitKey(0)
+
 
 if __name__ == "__main__":
     # Ścieżka do filmu z mapą głębi lub ID kamery
     videoPath = "/home/ciasterix/Kodzenie/Kinect/Kinart/videokinec_depth13.avi"
 
     frame = kin.get_depth_with_3rd_layer()
-    
+
     paint = GUI.Kinart()
 
     # Obiekt klasy HandTracker, której głównym zadaniem jest zwracanie współrzędnych dłoni, na podstawie filmu mapy głębi
@@ -273,14 +248,8 @@ if __name__ == "__main__":
     print("start")
 
     while hT.kinectOpened():
-        print("petla")
 
         cv2.waitKey(1)
-        # hT.cap.set(cv2.CAP_PROP_POS_MSEC, 39550)
-        # Sztuczne spowolnienie klatek, tylko do celów testowych
-        # Pobieranie kolejnej klatki
-        # frame = hT.getNextFrame()
-        # print(frame)
         frame = kin.get_depth_with_3rd_layer()
         # Jeśli klatka została wczytana poprawnie to kontynuuj
         if frame is not None:
@@ -322,27 +291,28 @@ if __name__ == "__main__":
                     elif coords[1] > 480:
                         print("Wrong coords !")
                     elif coords[1] > 0 and coords[1] <= 50:
-                        if coords[0] > 0 and coords[0] <= 130:
-                            print("Black Button")
+                        if coords[0] > 0 and coords[0] <= 90:  # 130
+                            # print("SAVE Button")
+                            paint.save()
+                        if coords[0] > 90 and coords[0] <= 180:  # 130
+                            # print("Black Button")
                             paint.black_color()
-                        if coords[0] > 130 and coords[0] <= 230:
-                            print("Blue Button")
+                        if coords[0] > 180 and coords[0] <= 270:
+                            # print("Blue Button")
                             paint.blue_color()
-                        if coords[0] > 230 and coords[0] <= 330:
-                            print("Red Button")
+                        if coords[0] > 270 and coords[0] <= 360:
+                            # print("Red Button")
                             paint.red_color()
-                        if coords[0] > 330 and coords[0] <= 430:
-                            print("Green Button")
+                        if coords[0] > 360 and coords[0] <= 450:
+                            # print("Green Button")
                             paint.green_color()
-                        if coords[0] > 430 and coords[0] <= 530:
-                            print("Eraser Button")
-                            paint.eraser_button()
+                        if coords[0] > 450 and coords[0] <= 530:
+                            # print("Eraser Button")
+                            paint.use_eraser()
                         if coords[0] > 530 and coords[0] < 640:
-                            print("Pen Button")
-                            paint.pen_button()
+                            # print("Pen Button")
+                            paint.use_pen()
                     else:
-                        # print(coords)
-                        # print(paint.getWindowSize())
                         paint.updateCoords((640 - coords[0]), (coords[1] - 50))
 
                 else:

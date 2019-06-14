@@ -1,20 +1,12 @@
 import tkinter as tk
-import time
-
 import PIL
 from PIL import ImageDraw
 
-import handTracker as ht
-import cv2
-
 class Kinart(object):
-
-    DEFAULT_PEN_SIZE = 3.0
-    DEFAULT_COLOR = 'black'
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.lift() # always on the top
+        self.root.lift()
 
         # WINDOW SIZE
         self.root.geometry('640x480')
@@ -24,28 +16,24 @@ class Kinart(object):
         self.pen_button.grid(row=0, column=0, sticky='NSEW')
 
         # ERASER BUTTON
-        self.eraser_button = tk.Button(self.root, text='ERASER', height=3, width=5, command=self.use_eraser)
+        self.eraser_button = tk.Button(self.root, text='ERASER', bg='green', height=3, width=5, command=self.use_eraser)
         self.eraser_button.grid(row=0, column=1, sticky='NSEW')
 
         # 4 COLORS
-        green_text = tk.StringVar()
-        self.green_button = tk.Button(self.root, bg='green', textvariable=green_text, height=3, width=5, command=self.green_color)
+        self.green_button = tk.Button(self.root, bg='green', height=3, width=5, command=self.green_color)
         self.green_button.grid(row=0, column=2, sticky='NSEW')
 
-        red_text = tk.StringVar()
-        self.red_button = tk.Button(self.root, bg='red', textvariable=red_text, height=3, width=5, command=self.red_color)
+        self.red_button = tk.Button(self.root, bg='red', height=3, width=5, command=self.red_color)
         self.red_button.grid(row=0, column=3, sticky='NSEW')
 
-        blue_text = tk.StringVar()
-        self.blue_button = tk.Button(self.root, bg='blue', textvariable=blue_text, height=3, width=5, command=self.blue_color)
+        self.blue_button = tk.Button(self.root, bg='blue', height=3, width=5, command=self.blue_color)
         self.blue_button.grid(row=0, column=4, sticky='NSEW')
 
-        black_text = tk.StringVar()
-        self.black_button = tk.Button(self.root, bg='black', textvariable=black_text, height=3, width=5, command=self.black_color)
+        self.black_button = tk.Button(self.root, bg='black', height=3, width=5, command=self.black_color)
         self.black_button.grid(row=0, column=5, sticky='NSEW')
 
         # SAVE BUTTON
-        self.save_button = tk.Button(self.root, text="SAVE", height=3, width=5, command=self.save)
+        self.save_button = tk.Button(self.root, text="SAVE", bg='green', height=3, width=5, command=self.save)
         self.save_button.grid(row=0, column=6, sticky='NSEW')
 
         # PAINTING
@@ -71,12 +59,11 @@ class Kinart(object):
         self.setup()
 
     def setup(self):
-        self.ispainting = False
         self.old_x = 0
         self.old_y = 0
         self.old_dot = None
         self.line_width = 20
-        self.color = self.DEFAULT_COLOR
+        self.color = 'black'
         self.eraser_on = False
         self.active_button = self.pen_button
         self.activate_button(self.active_button)
@@ -92,6 +79,10 @@ class Kinart(object):
         self.old_x = x
         self.old_y = y
         self.root.update()
+
+    def resetCoords(self):
+        self.old_x = None
+        self.old_y = None
 
     def createDot(self, x, y):
         if self.old_dot:
@@ -122,7 +113,7 @@ class Kinart(object):
 
     def use_eraser(self):
         self.active_button_color.config(relief=tk.RAISED)
-        self.activate_button(self.eraser_button, eraser_mode=True)
+        self(self.eraser_button, eraser_mode=True)
 
     def green_color(self):
         self.eraser_on = False
@@ -157,6 +148,11 @@ class Kinart(object):
         self.eraser_on = eraser_mode
         self.activate_button(self.pen_button)
 
-    def reset(self):
-        self.old_x = None
-        self.old_y = None
+    def save(self):
+        self.active_button_color.config(relief=tk.RAISED)
+        self.activate_button(self.save_button)
+        filename = "painting.jpg"
+        self.image.save(filename)
+
+if __name__ == "__main__":
+    Kinart()
