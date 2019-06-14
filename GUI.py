@@ -12,11 +12,11 @@ class Kinart(object):
         self.root.geometry('640x480')
 
         # PEN BUTTON
-        self.pen_button = tk.Button(self.root, text='RESET', height=3, width=5, command=self.resetCanvas)
-        self.pen_button.grid(row=0, column=0, sticky='NSEW')
+        self.reset_button = tk.Button(self.root, text='RESET', bg='white', height=3, width=5, command=self.resetCanvas)
+        self.reset_button.grid(row=0, column=0, sticky='NSEW')
 
         # ERASER BUTTON
-        self.eraser_button = tk.Button(self.root, text='ERASER', bg='green', height=3, width=5, command=self.use_eraser)
+        self.eraser_button = tk.Button(self.root, text='ERASER', bg='white', height=3, width=5, command=self.use_eraser)
         self.eraser_button.grid(row=0, column=1, sticky='NSEW')
 
         # 4 COLORS
@@ -33,7 +33,7 @@ class Kinart(object):
         self.black_button.grid(row=0, column=5, sticky='NSEW')
 
         # SAVE BUTTON
-        self.save_button = tk.Button(self.root, text="SAVE", bg='green', height=3, width=5, command=self.save)
+        self.save_button = tk.Button(self.root, text="SAVE", bg='white', height=3, width=5, command=self.save)
         self.save_button.grid(row=0, column=6, sticky='NSEW')
 
         # PAINTING
@@ -65,10 +65,8 @@ class Kinart(object):
         self.line_width = 20
         self.color = 'black'
         self.eraser_on = False
-        self.active_button = self.pen_button
+        self.active_button = self.black_button
         self.activate_button(self.active_button)
-        self.active_button_color = self.black_button
-        self.activate_button_color(self.active_button_color)
 
     def updateCoords(self, x, y):
         self.line_width = 20 if self.eraser_on else 8
@@ -100,56 +98,43 @@ class Kinart(object):
             self.painting.delete(self.old_dot)
             self.root.update()
 
-    def save(self):
-        self.active_button_color.config(relief=tk.RAISED)
-        self.activate_button(self.save_button)
-        filename = "painting.jpg"
-        self.image.save(filename)
-
     def resetCanvas(self):
         self.painting.delete("all")
         self.image = PIL.Image.new("RGB", (640,430), (255, 255, 255))
-        self.draw = ImageDraw.Draw(self.image)        
+        self.draw = ImageDraw.Draw(self.image)
+        self.activate_button(self.reset_button)
 
     def use_eraser(self):
-        self.active_button_color.config(relief=tk.RAISED)
-        self(self.eraser_button, eraser_mode=True)
+        self.activate_button(self.eraser_button, eraser_mode=True)
 
     def green_color(self):
         self.eraser_on = False
         self.color = 'green'
-        self.activate_button_color(self.green_button)
+        self.activate_button(self.green_button)
 
     def red_color(self):
         self.eraser_on = False
         self.color = 'red'
-        self.activate_button_color(self.red_button)
+        self.activate_button(self.red_button)
 
     def blue_color(self):
         self.eraser_on = False
         self.color = 'blue'
-        self.activate_button_color(self.blue_button)
+        self.activate_button(self.blue_button)
 
     def black_color(self):
         self.eraser_on = False
         self.color = 'black'
-        self.activate_button_color(self.black_button)
+        self.activate_button(self.black_button)
 
-    def activate_button(self, some_button, eraser_mode=False):
-        self.active_button.config(relief=tk.RAISED)
-        self.active_button = some_button
-        some_button.config(relief=tk.SUNKEN)
+    def activate_button(self, button, eraser_mode=False):
+        if self.active_button:
+            self.active_button.config(relief=tk.RAISED)
+        self.active_button = button
+        self.active_button.config(relief=tk.SUNKEN)
         self.eraser_on = eraser_mode
-
-    def activate_button_color(self, some_button, eraser_mode=False):
-        self.active_button_color.config(relief=tk.RAISED)
-        some_button.config(relief=tk.SUNKEN)
-        self.active_button_color = some_button
-        self.eraser_on = eraser_mode
-        self.activate_button(self.pen_button)
 
     def save(self):
-        self.active_button_color.config(relief=tk.RAISED)
         self.activate_button(self.save_button)
         filename = "painting.jpg"
         self.image.save(filename)
